@@ -16,7 +16,7 @@ Figma Visual Compare Skill is a reusable agent skill for validating local UI imp
 #### Codex（macOS / Linux）
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/gh286991/figma-visual-compare/main/install-codex.sh | bash
+curl -fsSL https://raw.githubusercontent.com/gh286991/figma-visual-compare/master/install-codex.sh | bash
 ```
 
 或下載後執行：
@@ -28,7 +28,7 @@ bash install-codex.sh
 #### Codex（Windows PowerShell）
 
 ```powershell
-irm https://raw.githubusercontent.com/gh286991/figma-visual-compare/main/install-codex.ps1 | iex
+irm https://raw.githubusercontent.com/gh286991/figma-visual-compare/master/install-codex.ps1 | iex
 ```
 
 或下載後執行：
@@ -126,18 +126,18 @@ figma-visual-compare-skill/
 
 #### OpenSkills
 
-本 repository 可作為 OpenSkills 的安裝來源。發佈到 GitHub 後，請將下列指令中的 `<owner>/<repo>` 替換為實際 repository 路徑。
+本 repository 可作為 OpenSkills 的安裝來源。
 
 從 GitHub 安裝：
 
 ```bash
-npx openskills install <owner>/<repo>
+npx openskills install gh286991/figma-visual-compare
 ```
 
 例如：
 
 ```bash
-npx openskills install yourname/figma-visual-compare-skill
+npx openskills install gh286991/figma-visual-compare
 ```
 
 若要使用本地路徑進行安裝測試：
@@ -205,7 +205,7 @@ python3 /absolute/path/to/skill/scripts/image_diff.py \
 #### Codex (macOS / Linux)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/gh286991/figma-visual-compare/main/install-codex.sh | bash
+curl -fsSL https://raw.githubusercontent.com/gh286991/figma-visual-compare/master/install-codex.sh | bash
 ```
 
 Or run the local script after cloning:
@@ -217,7 +217,7 @@ bash install-codex.sh
 #### Codex (Windows PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/gh286991/figma-visual-compare/main/install-codex.ps1 | iex
+irm https://raw.githubusercontent.com/gh286991/figma-visual-compare/master/install-codex.ps1 | iex
 ```
 
 Or run the local script after cloning:
@@ -297,18 +297,18 @@ Use the appropriate file under `skills/figma-visual-compare/adapters/` and copy 
 
 #### OpenSkills
 
-This repository can be used as an OpenSkills installation source. After publishing to GitHub, replace `<owner>/<repo>` with the actual repository path.
+This repository can be used as an OpenSkills installation source.
 
 Install from GitHub:
 
 ```bash
-npx openskills install <owner>/<repo>
+npx openskills install gh286991/figma-visual-compare
 ```
 
 Example:
 
 ```bash
-npx openskills install yourname/figma-visual-compare-skill
+npx openskills install gh286991/figma-visual-compare
 ```
 
 For local-path testing:
