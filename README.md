@@ -11,6 +11,32 @@ Figma Visual Compare Skill is a reusable agent skill for validating local UI imp
 
 ## 中文說明
 
+### 快速安裝
+
+#### Codex（macOS / Linux）
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/gh286991/figma-visual-compare/main/install-codex.sh | bash
+```
+
+或下載後執行：
+
+```bash
+bash install-codex.sh
+```
+
+#### Codex（Windows PowerShell）
+
+```powershell
+irm https://raw.githubusercontent.com/gh286991/figma-visual-compare/main/install-codex.ps1 | iex
+```
+
+或下載後執行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install-codex.ps1
+```
+
 ### 簡介
 
 Figma Visual Compare Skill 用於將本地 UI 實作與 Figma 節點、截圖或設計連結進行精準視覺比對，並輸出標準化差異成果，包含 mismatch ratio、diff 圖片與報告檔。
@@ -76,6 +102,11 @@ figma-visual-compare-skill/
 ```
 
 安裝後請重新啟動 Codex。
+
+也可以使用 repository 內建安裝腳本：
+
+- macOS / Linux: [install-codex.sh](install-codex.sh)
+- Windows PowerShell: [install-codex.ps1](install-codex.ps1)
 
 #### Cursor
 
@@ -169,6 +200,32 @@ python3 /absolute/path/to/skill/scripts/image_diff.py \
 
 ## English
 
+### Quick Install
+
+#### Codex (macOS / Linux)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/gh286991/figma-visual-compare/main/install-codex.sh | bash
+```
+
+Or run the local script after cloning:
+
+```bash
+bash install-codex.sh
+```
+
+#### Codex (Windows PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/gh286991/figma-visual-compare/main/install-codex.ps1 | iex
+```
+
+Or run the local script after cloning:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install-codex.ps1
+```
+
 ### Overview
 
 Figma Visual Compare Skill is designed to compare local UI implementations against Figma nodes, screenshots, or design URLs and produce standardized visual diff artifacts.
@@ -216,6 +273,11 @@ Copy `skills/figma-visual-compare/` to:
 ```
 
 Restart Codex after installation.
+
+You may also use the bundled install scripts:
+
+- macOS / Linux: [install-codex.sh](install-codex.sh)
+- Windows PowerShell: [install-codex.ps1](install-codex.ps1)
 
 #### Cursor
 
