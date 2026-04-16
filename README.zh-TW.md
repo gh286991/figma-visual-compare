@@ -83,17 +83,65 @@ Agent 會自動處理擷取、比對、報告、迭代修正的全流程。
 
 ## 前置需求
 
-| 需求 | 說明 |
-|------|------|
-| **Storybook** | 目標元件需有對應的 Storybook Story，作為擷取來源 |
-| **Figma MCP** | Agent 需要 Figma MCP 存取權，才能讀取設計節點資訊 |
-| **Figma API Token** | 需設定環境變數 `FIGMA_API_TOKEN` 或 `FIGMA_TOKEN` |
-| **Node.js** | 執行主要比對腳本 `figma-visual-compare.cjs` |
-| **Python 3.10+** | 執行像素比對腳本 `image_diff.py` |
-| **@playwright/test** | Storybook 截圖依賴 Playwright |
-| **sharp** | 圖片處理依賴，從目標專案自動解析 |
+**一鍵安裝指令（推薦）**
 
-> `@playwright/test` 與 `sharp` 從**目標專案**優先解析，不需要全域安裝。
+如果你已經將 skill 安裝在你的專案中（例如在 `skills/figma-visual-compare`），你可以直接在專案根目錄執行一鍵腳本。它會自動檢查並安裝所需的 Node.js 與 Python 依賴：
+
+```bash
+./skills/figma-visual-compare/install-deps.sh
+```
+
+<details>
+<summary><b>手動安裝與需求設定詳細說明</b></summary><br>
+
+### Node.js 套件（從專案解析）
+
+Compare script 會優先從你的**專案 `node_modules`** 載入這些套件：
+
+| 套件 | 沒有的話怎麼裝 |
+|------|--------------|
+| `@playwright/test` | `npm install --save-dev @playwright/test` |
+| `sharp` | `npm install --save-dev sharp` |
+
+安裝 Playwright 後，還需要安裝瀏覽器執行檔：
+
+```bash
+npx playwright install chromium
+```
+
+### Python 套件
+
+像素比對腳本需要 Python 3.10+ 以及：
+
+| 套件 | 沒有的話怎麼裝 |
+|------|--------------|
+| `numpy` | `pip install numpy` |
+| `Pillow` | `pip install Pillow` |
+
+或一次安裝兩個：
+
+```bash
+pip install numpy Pillow
+```
+
+### Figma 存取設定
+
+| 需求 | 設定方式 |
+|------|---------|
+| **Figma MCP** | 在 agent 的 MCP 設定中啟用 Figma MCP，讓 agent 能讀取設計節點資料 |
+| **Figma API Token** | 到 [figma.com/settings](https://www.figma.com/settings) → Personal access tokens 建立 token，然後在 `.env` 或 shell 中設定 `FIGMA_API_TOKEN=<token>` |
+
+### Storybook
+
+Skill 在 Storybook 未執行時會嘗試自動啟動。你的專案需要已安裝 Storybook，且目標元件需有對應的 Story。
+
+若 Storybook 無法自動啟動，請先手動執行再觸發 agent：
+
+```bash
+npm run storybook
+```
+
+</details>
 
 ---
 

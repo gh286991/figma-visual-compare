@@ -84,19 +84,67 @@ The agent handles everything — capturing, comparing, reporting, and iterating 
 
 ## Prerequisites
 
-Your project needs the following before this skill can work:
+**Quick Installer (Recommended)**
 
-| Requirement | Why It's Needed |
-|-------------|-----------------|
-| **Storybook** | The skill captures the component from a running Storybook story |
-| **Figma MCP** | The agent needs Figma MCP access to read design node information |
-| **Figma API Token** | Set `FIGMA_API_TOKEN` or `FIGMA_TOKEN` in your environment |
-| **Node.js** | Runs `figma-visual-compare.cjs`, the main compare script |
-| **Python 3.10+** | Runs `image_diff.py`, the pixel comparison script |
-| **@playwright/test** | Storybook screenshot capture depends on Playwright |
-| **sharp** | Image processing; resolved from the target project automatically |
+If you have already installed the skill into your repository (e.g., in `skills/figma-visual-compare`), you can run the one-click installer from your project root. It will check and install all required Node.js and Python dependencies automatically:
 
-> `@playwright/test` and `sharp` are resolved from the **target project** — no global installation needed.
+```bash
+./skills/figma-visual-compare/install-deps.sh
+```
+
+<details>
+<summary><b>Manual Installation Details</b></summary><br>
+
+Your project needs the following before this skill can work. If anything is missing, use the install commands below.
+
+### Node.js packages (resolved from your project)
+
+The compare script looks for these in your **project's** `node_modules` first.
+
+| Package | Install if missing |
+|---------|--------------------|
+| `@playwright/test` | `npm install --save-dev @playwright/test` |
+| `sharp` | `npm install --save-dev sharp` |
+
+After installing Playwright, also install the browser binary:
+
+```bash
+npx playwright install chromium
+```
+
+### Python packages
+
+The pixel diff script requires Python 3.10+ with:
+
+| Package | Install if missing |
+|---------|--------------------|
+| `numpy` | `pip install numpy` |
+| `Pillow` | `pip install Pillow` |
+
+Or install both at once:
+
+```bash
+pip install numpy Pillow
+```
+
+### Figma access
+
+| Requirement | How to set it up |
+|-------------|------------------|
+| **Figma MCP** | Configure Figma MCP in your agent's MCP settings so the agent can read design node data |
+| **Figma API Token** | Create a token at [figma.com/settings](https://www.figma.com/settings) → Personal access tokens, then set `FIGMA_API_TOKEN=<token>` in your `.env` or shell |
+
+### Storybook
+
+The skill starts Storybook automatically if it isn't already running. Your project must have Storybook installed and the target component must have a story.
+
+If Storybook fails to start, run it manually before triggering the agent:
+
+```bash
+npm run storybook
+```
+
+</details>
 
 ---
 
