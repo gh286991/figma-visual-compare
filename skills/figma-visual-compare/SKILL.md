@@ -15,12 +15,12 @@ Compare a local implementation against a Figma design as precisely as possible, 
 
 1. Identify the smallest stable compare target.
    - Prefer a dedicated Storybook story over a docs page.
-   - Prefer a component root selector such as `--selector '[data-testid="..."]'`.
+   - Prefer a component root selector such as `--selector '[data-testid="<component>-root"]'`.
    - Selector priority:
-     1. component data-testid root
+     1. component `data-testid` root
      2. component story wrapper selector
      3. `#storybook-root > *` as the last fallback
-   - Never use `#storybook-root` itself as the compare selector for component-level visual diff.
+   - Never use `#storybook-root` itself as the compare selector.
    - If the compare report shows `"selector": "#storybook-root"`, treat that run as invalid and rerun.
 2. If the user gives a Figma design or file URL with `node-id`, pass it directly to the compare script.
 3. If the component depends on relative time, freeze it with `--mock-date`.
@@ -71,43 +71,42 @@ The bundled compare script supports direct Figma design and file URLs. It reads 
   - icon placement
 - Do not change font family unless the user explicitly asks for that.
 
-## Repo commands
+## Script commands
 
 Primary compare command:
 
 ```bash
-node <path-to-skill>/scripts/figma-visual-compare.cjs --story-id <story-id> --selector '<selector>' --figma '<figma-url-or-file>'
+node <path-to-skill>/scripts/figma-visual-compare.cjs \
+  --story-id <story-id> \
+  --selector '<selector>' \
+  --figma '<figma-url-or-file>'
+```
+
+With common options:
+
+```bash
+node <path-to-skill>/scripts/figma-visual-compare.cjs \
+  --story-id <story-id> \
+  --selector '[data-testid="<component>-root"]' \
+  --figma 'https://www.figma.com/design/<file-key>?node-id=<node-id>' \
+  --trim-whitespace false \
+  --top-left-anchor true
+```
+
+For time-dependent components, freeze the date:
+
+```bash
+node <path-to-skill>/scripts/figma-visual-compare.cjs \
+  --story-id <story-id> \
+  --selector '[data-testid="<component>-root"]' \
+  --figma '<figma-url>' \
+  --mock-date <YYYY-MM-DDT00:00:00Z>
 ```
 
 Direct file-to-file diff:
 
 ```bash
 python3 <path-to-skill>/scripts/image_diff.py --reference <figma.png> --actual <impl.png>
-```
-
-## DayPicker example for this repo
-
-```bash
-node <path-to-skill>/scripts/figma-visual-compare.cjs \
-  --story-id compositions-daypicker--figma-last-seven-days-reference \
-  --selector '[data-testid="daypicker-root"]' \
-  --figma 'https://www.figma.com/design/9dw6LAxiZBhDdPzFjxpy76/Galaxy-Library?node-id=1573-14555&m=dev' \
-  --mock-date 2025-06-29T00:00:00Z \
-  --trim-whitespace false \
-  --top-left-anchor true
-```
-
-For `DayPicker`, the selector should be:
-
-```bash
---selector '[data-testid="daypicker-root"]'
-```
-
-If a run used `#storybook-root`, discard it and rerun.
-If `daypicker-root` is temporarily unavailable, fallback to:
-
-```bash
---selector '#storybook-root > *'
 ```
 
 ## Expected behavior
@@ -129,5 +128,5 @@ you should:
 ## Notes for portability
 
 - This skill bundles `figma-visual-compare.cjs` and `image_diff.py` under `scripts/`.
-- It still expects to be run from a repository that has Storybook, Playwright, and the target implementation available.
+- It expects to be run from a repository that has Storybook, Playwright, and the target implementation available.
 - Product-specific adapters live under `adapters/`. Treat `SKILL.md` as the source of truth.

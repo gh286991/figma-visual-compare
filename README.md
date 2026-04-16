@@ -1,368 +1,211 @@
 # Figma Visual Compare Skill
 
-Figma Visual Compare Skill is a reusable agent skill for validating local UI implementations against Figma references with precise visual diff artifacts.
+> **中文說明請見 [README.zh-TW.md](README.zh-TW.md)**
 
-- Canonical skill: [skills/figma-visual-compare/SKILL.md](skills/figma-visual-compare/SKILL.md)
-- Anthropic Agent Skills overview: [English documentation](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)
-- OpenAI Codex skills: [English documentation](https://developers.openai.com/codex/skills)
-- OpenSkills: [GitHub](https://github.com/numman-ali/openskills)
+A reusable agent skill that lets your AI agent automatically compare local UI component implementations against Figma design nodes — producing pixel-level diff reports and iterating until the layout matches.
+
+![Workflow](docs/workflow.png)
 
 ---
 
-## 中文說明
+## What It Does
 
-### 快速安裝
+When you ask your agent to compare a component with a Figma design, the skill:
 
-#### Codex（macOS / Linux）
+1. **Captures** a screenshot of the component from your running Storybook
+2. **Fetches** the corresponding Figma design node via the Figma API
+3. **Compares** them pixel-by-pixel using the bundled comparison scripts
+4. **Reports** the mismatch ratio, highlights the largest diff regions, and suggests fixes
+5. **Iterates** — applies code changes and reruns until the score drops materially
+
+---
+
+## Real-World Example
+
+### Iteration Progress
+
+The agent ran the comparison, applied fixes, and reran — three times total:
+
+| | ① Initial | ② After layout fix | ③ After inset tuning |
+|---|:---:|:---:|:---:|
+| **mismatchRatio** | **11.81%** | **3.52%** | **1.78%** |
+| **Storybook** | ![run 1 actual](docs/iter-1-actual.png) | ![run 2 actual](docs/iter-2-actual.png) | ![run 3 actual](docs/iter-3-actual.png) |
+| **diff.png** | ![run 1](docs/iter-1-diff.png) | ![run 2](docs/iter-2-diff.png) | ![run 3](docs/iter-3-diff.png) |
+| **What changed** | Baseline — spacing, padding, and key widths all off | Applied `px-24`, `gap-48`, `gap-24`; corrected bottom-row widths | Tuned `--actual-inset`; layout pixel-perfect |
+| **Remaining diff** | All keys and buttons misaligned | Background tint + one button label | One button label only (font rendering) |
+
+**Figma reference** (target throughout all runs):
+
+![Figma reference](docs/iter-figma-ref.png)
+
+
+---
+
+## How to Use
+
+### Ask Your Agent
+
+Once the skill is installed, just tell your agent in natural language:
+
+> *"Compare the `<ComponentName>` Storybook story against this Figma node: `<figma-url>`. Show me the mismatch ratio and the biggest visual differences."*
+
+> *"Run a visual diff for `<story-id>` using the Figma design at `<figma-url>`. If there are layout issues, fix them and rerun until the score improves."*
+
+> *"How close is the current `<ComponentName>` implementation to the Figma design? Identify the diff regions and tell me what to fix."*
+
+The agent handles everything — capturing, comparing, reporting, and iterating — until the layout converges.
+
+### What the Agent Does Step by Step
+
+```
+1. Identify the correct Storybook story for the target component
+2. Determine the best CSS selector to isolate the component
+3. Capture a screenshot via Playwright + Storybook
+4. Fetch the Figma design node via the Figma API
+5. Run pixel comparison and output diff artifacts
+6. Analyze the largest diff regions
+7. Apply code fixes, then rerun — repeat until the score drops materially
+```
+
+---
+
+## Outputs
+
+| File | Description |
+|------|-------------|
+| `mismatchRatio` | Overall pixel difference ratio — `0` means perfect match |
+| `diff.png` | Heatmap highlighting mismatched pixels |
+| `diff.overlay.png` | Annotated diff with numbered mismatch regions |
+| `story.actual.png` | Screenshot captured from Storybook |
+| `figma.normalized.png` | Figma export, scaled and aligned to match the implementation |
+| `report.json` | Full JSON report with region-level diff data |
+
+---
+
+## Prerequisites
+
+Your project needs the following before this skill can work:
+
+| Requirement | Why It's Needed |
+|-------------|-----------------|
+| **Storybook** | The skill captures the component from a running Storybook story |
+| **Figma MCP** | The agent needs Figma MCP access to read design node information |
+| **Figma API Token** | Set `FIGMA_API_TOKEN` or `FIGMA_TOKEN` in your environment |
+| **Node.js** | Runs `figma-visual-compare.cjs`, the main compare script |
+| **Python 3.10+** | Runs `image_diff.py`, the pixel comparison script |
+| **@playwright/test** | Storybook screenshot capture depends on Playwright |
+| **sharp** | Image processing; resolved from the target project automatically |
+
+> `@playwright/test` and `sharp` are resolved from the **target project** — no global installation needed.
+
+---
+
+## Installation
+
+### Using `npx skill add` (Recommended)
+
+Project-local install:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/gh286991/figma-visual-compare/master/install-codex.sh | bash
+npx skill add https://github.com/gh286991/figma-visual-compare --skill figma-visual-compare
 ```
 
-或下載後執行：
+Global install:
 
 ```bash
-bash install-codex.sh
+npx skill add https://github.com/gh286991/figma-visual-compare --skill figma-visual-compare --global
 ```
 
-#### Codex（Windows PowerShell）
+Preview available skills before installing:
 
-```powershell
-irm https://raw.githubusercontent.com/gh286991/figma-visual-compare/master/install-codex.ps1 | iex
+```bash
+npx skill add https://github.com/gh286991/figma-visual-compare --list
 ```
 
-或下載後執行：
+### Claude
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\install-codex.ps1
+Copy `skills/figma-visual-compare/` to:
+
+```
+~/.claude/skills/figma-visual-compare/
 ```
 
-### 簡介
+If your Claude environment supports custom skill uploads, package and upload the folder directly.
 
-Figma Visual Compare Skill 用於將本地 UI 實作與 Figma 節點、截圖或設計連結進行精準視覺比對，並輸出標準化差異成果，包含 mismatch ratio、diff 圖片與報告檔。
+### Cursor
 
-### 功能
+Copy the adapter file into your project:
 
-- 支援 Storybook 或 Playwright 擷取的實作畫面
-- 支援本地圖片、直連圖片 URL、以及帶有 `node-id` 的 Figma design/file URL
-- 輸出下列 artifacts：
-  - `mismatchRatio`
-  - `diff.png`
-  - `story.actual.png`
-  - `figma.normalized.png`
-  - JSON report
-- skill 內已包含比對所需腳本，無須額外複製 compare script
+```
+skills/figma-visual-compare/adapters/cursor/figma-visual-compare.md
+  → .cursor/skills/figma-visual-compare.md
+```
 
-### 專案結構
+### AGENTS-style Tools
 
-```text
+Copy the appropriate file from `skills/figma-visual-compare/adapters/` into your tool's `AGENTS.md` or equivalent instruction file.
+
+---
+
+## Compatibility
+
+| Tool | Install Method |
+|------|---------------|
+| Claude | `~/.claude/skills/` or `npx skill add` |
+| Codex | `~/.codex/skills/` or `npx skill add` |
+| Cursor | `.cursor/skills/` adapter |
+| AGENTS-style tools | `AGENTS.md` adapter |
+
+---
+
+## Repository Structure
+
+```
 figma-visual-compare-skill/
 ├── README.md
-├── AGENTS.md
-├── CLAUDE.md
+├── README.zh-TW.md
+├── docs/
+│   ├── workflow.png
+│   ├── example-actual.png
+│   ├── example-figma.png
+│   ├── example-diff.png
+│   └── example-diff-after.png
 └── skills/
     └── figma-visual-compare/
         ├── SKILL.md
-        ├── agents/
-        │   └── openai.yaml
         ├── scripts/
         │   ├── figma-visual-compare.cjs
         │   └── image_diff.py
         └── adapters/
+            ├── cursor/
+            │   └── figma-visual-compare.md
+            └── agents/
+                └── AGENTS.md
 ```
-
-### 相容性
-
-本專案目前提供以下使用方式：
-
-- Claude: 透過 skill 資料夾安裝
-- Codex: 透過 skill 資料夾安裝
-- Cursor: 透過 adapter 檔案接入 `.cursor/skills/`
-- AGENTS 類工具: 透過 `AGENTS.md` adapter 接入
-- OpenSkills: 可作為 GitHub repo 或 local path 安裝來源
-
-### 安裝
-
-#### Claude
-
-將 `skills/figma-visual-compare/` 複製到：
-
-```text
-~/.claude/skills/figma-visual-compare/
-```
-
-若你的 Claude 環境支援 custom skill 上傳，也可將該 skill 資料夾打包後上傳。
-
-#### Codex
-
-將 `skills/figma-visual-compare/` 複製到：
-
-```text
-~/.codex/skills/figma-visual-compare/
-```
-
-安裝後請重新啟動 Codex。
-
-也可以使用 repository 內建安裝腳本：
-
-- macOS / Linux: [install-codex.sh](install-codex.sh)
-- Windows PowerShell: [install-codex.ps1](install-codex.ps1)
-
-#### Cursor
-
-將下列檔案複製到目標專案：
-
-- [skills/figma-visual-compare/adapters/cursor/figma-visual-compare.md](skills/figma-visual-compare/adapters/cursor/figma-visual-compare.md)
-
-目標位置通常為：
-
-```text
-.cursor/skills/figma-visual-compare.md
-```
-
-#### AGENTS 類工具
-
-可依工具需求，選用 `skills/figma-visual-compare/adapters/` 下的對應檔案，複製到該工具支援的 `AGENTS.md` 或等價指令檔。
-
-#### OpenSkills
-
-本 repository 可作為 OpenSkills 的安裝來源。
-
-從 GitHub 安裝：
-
-```bash
-npx openskills install gh286991/figma-visual-compare
-```
-
-例如：
-
-```bash
-npx openskills install gh286991/figma-visual-compare
-```
-
-若要使用本地路徑進行安裝測試：
-
-```bash
-npx openskills install /absolute/path/to/figma-visual-compare-skill
-```
-
-安裝完成後，可依你的 OpenSkills 工作流執行同步：
-
-```bash
-openskills sync
-```
-
-說明：
-
-- 本 repo 目前封裝一個 skill：`figma-visual-compare`
-- OpenSkills 安裝的是整個 skill 資料夾，因此 `SKILL.md`、`scripts/` 與其他隨附檔案會一起被帶入
-- 建議在實際要執行比對的目標專案內使用此 skill，讓 compare script 可以優先解析該專案的依賴
-
-### 使用方式
-
-請在目標專案根目錄執行：
-
-```bash
-node /absolute/path/to/skill/scripts/figma-visual-compare.cjs \
-  --story-id <story-id> \
-  --selector '<selector>' \
-  --figma '<figma-url-or-file>'
-```
-
-直接執行圖片對圖片比對：
-
-```bash
-python3 /absolute/path/to/skill/scripts/image_diff.py \
-  --reference <figma.png> \
-  --actual <impl.png>
-```
-
-### 執行需求
-
-- 目標專案需具備 Node.js
-- 目標專案需具備 Python 3
-- 若要擷取 Storybook 畫面，目標專案需具備 Storybook
-- compare script 會優先從目標專案載入 `@playwright/test` 與 `sharp`
-- 若使用 Figma design/file URL，請提供：
-  - `FIGMA_API_TOKEN`
-  - 或 `FIGMA_TOKEN`
-
-### 發佈建議
-
-建議將本資料夾作為獨立 GitHub repository 維護，並於發佈前完成以下事項：
-
-1. 更新 README 中的 GitHub 安裝路徑
-2. 補充 `LICENSE`
-3. 建立第一個 release
-4. 驗證 OpenSkills、Claude 與 Codex 的安裝流程
 
 ---
 
-## English
+## `skills.sh` Public Page
 
-### Quick Install
+This repository follows the `skill` CLI structure requirements:
 
-#### Codex (macOS / Linux)
+- Contains `skills/<skill-name>/SKILL.md`
+- `SKILL.md` frontmatter `name` matches the directory name
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/gh286991/figma-visual-compare/master/install-codex.sh | bash
+Install source URL:
+```
+https://github.com/gh286991/figma-visual-compare
 ```
 
-Or run the local script after cloning:
-
-```bash
-bash install-codex.sh
+Public skill page (once indexed):
+```
+https://skills.sh/gh286991/figma-visual-compare/figma-visual-compare
 ```
 
-#### Codex (Windows PowerShell)
+> Being installable by the `skill` CLI does not automatically mean the skill appears on the `skills.sh` public page. Public visibility depends on the site's indexing state.
 
-```powershell
-irm https://raw.githubusercontent.com/gh286991/figma-visual-compare/master/install-codex.ps1 | iex
-```
+---
 
-Or run the local script after cloning:
+## License
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\install-codex.ps1
-```
-
-### Overview
-
-Figma Visual Compare Skill is designed to compare local UI implementations against Figma nodes, screenshots, or design URLs and produce standardized visual diff artifacts.
-
-### Features
-
-- Supports Storybook- or Playwright-captured implementation images
-- Supports local image files, direct image URLs, and Figma design/file URLs with `node-id`
-- Produces:
-  - `mismatchRatio`
-  - `diff.png`
-  - `story.actual.png`
-  - `figma.normalized.png`
-  - JSON report
-- Bundles the required comparison scripts inside the skill package
-
-### Compatibility
-
-This repository currently supports:
-
-- Claude via skill-folder installation
-- Codex via skill-folder installation
-- Cursor via `.cursor/skills/` adapter
-- AGENTS-style tools via adapter files
-- OpenSkills as a GitHub or local-path installation source
-
-### Installation
-
-#### Claude
-
-Copy `skills/figma-visual-compare/` to:
-
-```text
-~/.claude/skills/figma-visual-compare/
-```
-
-If your Claude environment supports custom skill uploads, you may also package and upload that folder directly.
-
-#### Codex
-
-Copy `skills/figma-visual-compare/` to:
-
-```text
-~/.codex/skills/figma-visual-compare/
-```
-
-Restart Codex after installation.
-
-You may also use the bundled install scripts:
-
-- macOS / Linux: [install-codex.sh](install-codex.sh)
-- Windows PowerShell: [install-codex.ps1](install-codex.ps1)
-
-#### Cursor
-
-Copy the following file into your target repository:
-
-- [skills/figma-visual-compare/adapters/cursor/figma-visual-compare.md](skills/figma-visual-compare/adapters/cursor/figma-visual-compare.md)
-
-Typical destination:
-
-```text
-.cursor/skills/figma-visual-compare.md
-```
-
-#### AGENTS-style tools
-
-Use the appropriate file under `skills/figma-visual-compare/adapters/` and copy it into the tool's supported `AGENTS.md` or equivalent instruction file.
-
-#### OpenSkills
-
-This repository can be used as an OpenSkills installation source.
-
-Install from GitHub:
-
-```bash
-npx openskills install gh286991/figma-visual-compare
-```
-
-Example:
-
-```bash
-npx openskills install gh286991/figma-visual-compare
-```
-
-For local-path testing:
-
-```bash
-npx openskills install /absolute/path/to/figma-visual-compare-skill
-```
-
-After installation, you may sync according to your OpenSkills workflow:
-
-```bash
-openskills sync
-```
-
-Notes:
-
-- This repository currently packages one skill: `figma-visual-compare`
-- OpenSkills installs the full skill folder, including `SKILL.md`, `scripts/`, and bundled resources
-- Run the skill from the target repository where the comparison should happen so the bundled script can resolve that repository's dependencies first
-
-### Usage
-
-Run from the target repository root:
-
-```bash
-node /absolute/path/to/skill/scripts/figma-visual-compare.cjs \
-  --story-id <story-id> \
-  --selector '<selector>' \
-  --figma '<figma-url-or-file>'
-```
-
-Direct image-to-image comparison:
-
-```bash
-python3 /absolute/path/to/skill/scripts/image_diff.py \
-  --reference <figma.png> \
-  --actual <impl.png>
-```
-
-### Requirements
-
-- Node.js must be available in the target repository
-- Python 3 must be available in the target repository
-- Storybook is required when capturing implementation views from stories
-- The compare script resolves `@playwright/test` and `sharp` from the target repository first
-- Figma design/file URL workflows require:
-  - `FIGMA_API_TOKEN`
-  - or `FIGMA_TOKEN`
-
-### Publishing Notes
-
-This repository is intended to be maintained as a standalone GitHub project. Before release:
-
-1. Update the GitHub installation path in this README
-2. Add a `LICENSE`
-3. Create the first release
-4. Verify installation flows for OpenSkills, Claude, and Codex
+See [LICENSE](LICENSE) for details.
