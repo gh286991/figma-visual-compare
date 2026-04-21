@@ -1,6 +1,8 @@
 # Figma Visual Compare Skill — 中文說明
 
 > **English README: [README.md](README.md)**
+>
+> Repository: [tom-skills/figma-visual-compare](https://github.com/tom-skills/figma-visual-compare)
 
 `figma-visual-compare` 是一個可重複使用的 agent skill，讓 AI agent 能自動比對你的 UI 元件實作與 Figma 設計節點之間的視覺差距，輸出像素級的差異報告，並迭代修正直到版面對齊。
 
@@ -147,24 +149,30 @@ npm run storybook
 
 ## 安裝
 
-### 使用 `npx skill add`（推薦）
+### 使用 `npx skills add`（推薦）
 
 專案內安裝：
 
 ```bash
-npx skill add https://github.com/gh286991/figma-visual-compare --skill figma-visual-compare
+npx skills add tom-skills/figma-visual-compare
 ```
 
 全域安裝：
 
 ```bash
-npx skill add https://github.com/gh286991/figma-visual-compare --skill figma-visual-compare --global
+npx skills add tom-skills/figma-visual-compare --global
 ```
 
 列出 repo 中可用的 skill：
 
 ```bash
-npx skill add https://github.com/gh286991/figma-visual-compare --list
+npx skills add tom-skills/figma-visual-compare --list
+```
+
+目前官方 CLI 文件推薦優先使用上面的 `owner/repo` 寫法。若你想明確指定 GitHub repository URL，或想把 skill 名稱寫清楚，也可以這樣安裝：
+
+```bash
+npx skills add https://github.com/tom-skills/figma-visual-compare --skill figma-visual-compare
 ```
 
 ### Claude
@@ -196,8 +204,8 @@ skills/figma-visual-compare/adapters/cursor/figma-visual-compare.md
 
 | 工具 | 安裝方式 |
 |------|----------|
-| Claude | `~/.claude/skills/` 或 `npx skill add` |
-| Codex | `~/.codex/skills/` 或 `npx skill add` |
+| Claude | `~/.claude/skills/` 或 `npx skills add` |
+| Codex | `~/.codex/skills/` 或 `npx skills add` |
 | Cursor | `.cursor/skills/` adapter |
 | AGENTS 類工具 | `AGENTS.md` adapter |
 

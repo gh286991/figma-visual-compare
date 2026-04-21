@@ -1,6 +1,8 @@
 # Figma Visual Compare Skill
 
 > **中文說明請見 [README.zh-TW.md](README.zh-TW.md)**
+>
+> Repository: [tom-skills/figma-visual-compare](https://github.com/tom-skills/figma-visual-compare)
 
 A reusable agent skill that lets your AI agent automatically compare local UI component implementations against Figma design nodes — producing pixel-level diff reports and iterating until the layout matches.
 
@@ -150,24 +152,30 @@ npm run storybook
 
 ## Installation
 
-### Using `npx skill add` (Recommended)
+### Using `npx skills add` (Recommended)
 
 Project-local install:
 
 ```bash
-npx skill add https://github.com/gh286991/figma-visual-compare --skill figma-visual-compare
+npx skills add tom-skills/figma-visual-compare
 ```
 
 Global install:
 
 ```bash
-npx skill add https://github.com/gh286991/figma-visual-compare --skill figma-visual-compare --global
+npx skills add tom-skills/figma-visual-compare --global
 ```
 
 Preview available skills before installing:
 
 ```bash
-npx skill add https://github.com/gh286991/figma-visual-compare --list
+npx skills add tom-skills/figma-visual-compare --list
+```
+
+The official CLI docs currently recommend the `owner/repo` form above. If you want to target the GitHub repository URL explicitly or select the skill by name, this also works:
+
+```bash
+npx skills add https://github.com/tom-skills/figma-visual-compare --skill figma-visual-compare
 ```
 
 ### Claude
@@ -199,8 +207,8 @@ Copy the appropriate file from `skills/figma-visual-compare/adapters/` into your
 
 | Tool | Install Method |
 |------|---------------|
-| Claude | `~/.claude/skills/` or `npx skill add` |
-| Codex | `~/.codex/skills/` or `npx skill add` |
+| Claude | `~/.claude/skills/` or `npx skills add` |
+| Codex | `~/.codex/skills/` or `npx skills add` |
 | Cursor | `.cursor/skills/` adapter |
 | AGENTS-style tools | `AGENTS.md` adapter |
 
@@ -209,7 +217,7 @@ Copy the appropriate file from `skills/figma-visual-compare/adapters/` into your
 ## Repository Structure
 
 ```
-figma-visual-compare-skill/
+figma-visual-compare/
 ├── README.md
 ├── README.zh-TW.md
 ├── docs/
